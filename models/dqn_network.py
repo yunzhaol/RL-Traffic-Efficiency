@@ -7,11 +7,11 @@ class DQNNetwork(nn.Module):
         super().__init__()
 
         self.network = nn.Sequential(
-            nn.Linear(state_dim, 32),
+            nn.Linear(state_dim, 64),
             nn.ReLU(),
-            nn.Linear(32, 32),
+            nn.Linear(64, 64),
             nn.ReLU(),
-            nn.Linear(32, action_dim)
+            nn.Linear(64, action_dim)
         )
 
     def forward(self, x):
