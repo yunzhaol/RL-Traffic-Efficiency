@@ -1,0 +1,9 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/yunzhaoli/Documents/CS9170-RL-Traffic-Efficiency/CityFlow/cmake_install.cmake",
+		"/Users/yunzhaoli/Documents/CS9170-RL-Traffic-Efficiency/CityFlow/extern/pybind11/cmake_install.cmake",
+		"/Users/yunzhaoli/Documents/CS9170-RL-Traffic-Efficiency/CityFlow/src/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
