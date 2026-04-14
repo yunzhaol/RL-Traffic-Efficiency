@@ -13,6 +13,7 @@ Output: results/phase_timeline.png
 Usage:
     python training/visualize_phases.py --sim sumo
     python training/visualize_phases.py --sim cityflow
+    python training/visualize_phases.py --sim sumo --show
 """
 
 import argparse
@@ -117,6 +118,8 @@ def draw_phase_bar(ax, phases, title):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--sim", choices=["cityflow", "sumo"], default="sumo")
+    parser.add_argument("--show", action="store_true",
+                        help="Display matplotlib window after saving chart")
     args = parser.parse_args()
 
     os.makedirs(RESULTS_DIR, exist_ok=True)
@@ -168,7 +171,8 @@ def main():
     out = os.path.join(RESULTS_DIR, f"phase_timeline_{args.sim}.png")
     plt.savefig(out, dpi=150)
     print(f"\nSaved: {out}")
-    plt.show()
+    if args.show:
+        plt.show()
 
 
 if __name__ == "__main__":

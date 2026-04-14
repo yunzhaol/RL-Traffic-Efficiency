@@ -15,6 +15,7 @@ Usage:
     python training/evaluate.py --sim sumo
     python training/evaluate.py --sim cityflow
     python training/evaluate.py --sim sumo --episodes 20
+    python training/evaluate.py --sim sumo --show
 """
 
 import argparse
@@ -119,7 +120,7 @@ def run_episodes(method: str, sim: str, n_episodes: int):
     }
 
 
-def plot_bar_chart(all_results: dict, sim: str):
+def plot_bar_chart(all_results: dict, sim: str, show: bool = False):
     methods = [m for m, r in all_results.items() if r is not None]
     if not methods:
         print("No results to plot.")
@@ -189,7 +190,8 @@ def plot_bar_chart(all_results: dict, sim: str):
     out = os.path.join(RESULTS_DIR, f"evaluation_{sim}.png")
     plt.savefig(out, dpi=150)
     print(f"\nBar chart saved: {out}")
-    plt.show()
+    if show:
+        plt.show()
 
 
 def print_summary(all_results: dict, sim: str):
@@ -217,6 +219,8 @@ def main():
     parser.add_argument("--sim",      choices=["cityflow", "sumo"], default="sumo")
     parser.add_argument("--episodes", type=int, default=10,
                         help="Evaluation episodes per method (10 recommended)")
+    parser.add_argument("--show", action="store_true",
+                        help="Display matplotlib window after saving chart")
     args = parser.parse_args()
 
     os.makedirs(RESULTS_DIR, exist_ok=True)
@@ -239,7 +243,7 @@ def main():
     print(f"Raw metrics saved: {out_json}")
 
     print_summary(all_results, args.sim)
-    plot_bar_chart(all_results, args.sim)
+    plot_bar_chart(all_results, args.sim, show=args.show)
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ Usage:
     python training/demo.py --method fixed --sim sumo
     python training/demo.py --method dqn --sim cityflow
     python training/demo.py --method dqn --sim sumo --delay 300   # slower
+    python training/demo.py --method dqn --sim sumo --gui-settings data/sumo/gui.settings.xml
 """
 
 import argparse
@@ -69,6 +70,8 @@ def main():
     parser.add_argument("--steps",  type=int, default=200)
     parser.add_argument("--delay",  type=int, default=200,
                         help="ms between SUMO-GUI frames (higher = slower/more visible)")
+    parser.add_argument("--gui-settings", type=str, default="data/sumo/gui.settings.xml",
+                        help="SUMO GUI settings XML to restore fixed camera/zoom")
     args = parser.parse_args()
 
     print("═" * 54)
@@ -80,8 +83,13 @@ def main():
     # ── Create environment ─────────────────────────────────────────────────
     if args.sim == "sumo":
         from env.sumo_traffic_env import SumoTrafficEnv
-        env = SumoTrafficEnv(use_gui=True, delay_ms=args.delay)
+        gui_settings = args.gui_settings if os.path.exists(args.gui_settings) else None
+        env = SumoTrafficEnv(use_gui=True, delay_ms=args.delay, gui_settings_file=gui_settings)
         print("Opening SUMO-GUI …  watch the intersection live.")
+        if gui_settings:
+            print(f"Using GUI settings: {gui_settings}")
+        else:
+            print("No GUI settings file found; using default camera view.")
         print("The agent controls the traffic lights automatically.")
         print("Press Ctrl+C to stop.\n")
     else:

@@ -29,7 +29,16 @@ bash run_cityflow.sh
 export SUMO_HOME="/Library/Frameworks/EclipseSUMO.framework/Versions/1.26.0/EclipseSUMO"
 export PATH="$PATH:$SUMO_HOME/bin"
 
-# Step 3 — Run full experiment (auto-generates network on first run)
+# Step 3 (only if GUI cannot open) — install and start XQuartz
+brew install --cask xquartz
+open -a XQuartz
+export DISPLAY=:0
+xhost +localhost
+
+# Quick test
+sumo-gui -c data/sumo/cross.sumocfg
+
+# Step 4 — Run full experiment (auto-generates network on first run)
 bash run_sumo.sh
 ```
 
@@ -61,6 +70,51 @@ Compare all methods on one plot:
 ```bash
 python3 training/compare_results.py
 ```
+
+### Showcase (Best for Demo / Presentation)
+
+Run all visualization outputs in one go (metrics + phase timeline + optional live GUI demo):
+```bash
+bash run_showcase.sh                     # default: sumo
+bash run_showcase.sh --sim cityflow      # cityflow version
+bash run_showcase.sh --episodes 20       # more stable evaluation metrics
+bash run_showcase.sh --no-demo           # only generate plots, no GUI
+bash run_showcase.sh --gui-settings data/sumo/gui.settings.xml
+```
+
+Note: if SUMO-GUI does not pop up inside Cursor terminal, run demo commands in macOS Terminal.app / iTerm.
+
+Direct commands (if you want each artifact separately):
+```bash
+# 1) Quantitative metrics comparison (reward / queue / throughput)
+python3 training/evaluate.py --sim sumo --episodes 10
+
+# 2) Signal phase decision timeline (fixed vs dqn vs ppo)
+python3 training/visualize_phases.py --sim sumo
+
+# 3) Live RL control in SUMO-GUI (most intuitive)
+python3 training/demo.py --method dqn --sim sumo --delay 200
+python3 training/demo.py --method ppo --sim sumo --delay 200
+python3 training/demo.py --method dqn --sim sumo --delay 200 --gui-settings data/sumo/gui.settings.xml
+```
+
+Save camera once (so you do not manually Locate/zoom every time):
+```bash
+# 1) Open SUMO-GUI once, move view to center intersection, set zoom
+sumo-gui -c data/sumo/cross.sumocfg
+
+# 2) In GUI menu: File -> Save GUI Settings As...
+#    Save to: data/sumo/gui.settings.xml
+
+# 3) Reuse saved camera automatically in demo/showcase
+python3 training/demo.py --method dqn --sim sumo --delay 200 --gui-settings data/sumo/gui.settings.xml
+bash run_showcase.sh --gui-settings data/sumo/gui.settings.xml
+```
+
+Generated files:
+- `results/evaluation_sumo.json`
+- `results/evaluation_sumo.png`
+- `results/phase_timeline_sumo.png`
 
 ---
 

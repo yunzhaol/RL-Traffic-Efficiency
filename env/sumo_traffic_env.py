@@ -15,6 +15,8 @@ Reward:           same formulation as CityFlow env for fair comparison
 
 import os
 import subprocess  # noqa: F401 — used for subprocess.DEVNULL in traci.start
+import sys
+import warnings
 
 import numpy as np
 
@@ -48,11 +50,13 @@ class SumoTrafficEnv:
         use_gui:  bool = False,
         action_duration: int = 10,
         delay_ms: int = 0,
+        gui_settings_file: str = None,
     ):
         self.cfg_file        = cfg_file or _CFG_FILE
         self.tl_id           = tl_id
         self.use_gui         = use_gui
         self.action_duration = action_duration
+        self.gui_settings_file = gui_settings_file
 
         self.current_phase       = 0
         self.prev_total_waiting  = 0.0
@@ -100,17 +104,56 @@ class SumoTrafficEnv:
         if self._sumo_home:
             os.environ["SUMO_HOME"] = self._sumo_home
 
-        cmd = [
-            self._sumo_bin,
-            "-c", self.cfg_file,
-            "--no-warnings",
-            "--no-step-log",
-            "--time-to-teleport", "-1",
-        ]
-        if self._delay_ms > 0:
-            cmd += ["--delay", str(self._delay_ms)]
-        traci.start(cmd, stdout=subprocess.DEVNULL)
-        self._sumo_running = True
+        def _build_cmd(bin_path: str):
+            cmd = [
+                bin_path,
+                "-c", self.cfg_file,
+                "--no-warnings",
+                "--no-step-log",
+                "--time-to-teleport", "-1",
+            ]
+            if self.use_gui and self.gui_settings_file and os.path.exists(self.gui_settings_file):
+                cmd += ["--gui-settings-file", self.gui_settings_file]
+            if self._delay_ms > 0:
+                cmd += ["--delay", str(self._delay_ms)]
+            return cmd
+
+        cmd = _build_cmd(self._sumo_bin)
+        old_display = os.environ.get("DISPLAY")
+        clear_display = bool(self.use_gui and sys.platform == "darwin" and old_display)
+        try:
+            if clear_display:
+                # On macOS, an inherited DISPLAY (e.g. :0.0) may force an invalid
+                # X11 path and break native SUMO-GUI startup.
+                warnings.warn(
+                    f"Ignoring DISPLAY={old_display!r} for SUMO-GUI on macOS.",
+                    RuntimeWarning,
+                )
+                os.environ.pop("DISPLAY", None)
+            traci.start(cmd, stdout=subprocess.DEVNULL, numRetries=1)
+            self._sumo_running = True
+            return
+        except Exception as e:
+            # On some systems (e.g. remote/headless terminals), sumo-gui fails
+            # with display errors. Fall back to headless sumo automatically.
+            if self.use_gui:
+                headless_bin = self._sumo_bin.replace("sumo-gui", "sumo")
+                if headless_bin == self._sumo_bin:
+                    headless_bin = "sumo"
+                warnings.warn(
+                    f"SUMO-GUI unavailable ({e}). Falling back to headless SUMO.",
+                    RuntimeWarning,
+                )
+                self.use_gui = False
+                self._delay_ms = 0
+                self._sumo_bin = headless_bin
+                traci.start(_build_cmd(self._sumo_bin), stdout=subprocess.DEVNULL, numRetries=1)
+                self._sumo_running = True
+                return
+            raise
+        finally:
+            if clear_display and old_display is not None:
+                os.environ["DISPLAY"] = old_display
 
     def reset(self):
         self._start_sumo()
