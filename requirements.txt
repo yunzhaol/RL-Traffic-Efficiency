@@ -1,0 +1,6 @@
+numpy>=1.21
+torch>=1.9
+matplotlib>=3.4
+traci>=1.0
+sumolib>=1.0
+# cityflow is installed from source via install_cityflow.sh (not on PyPI)

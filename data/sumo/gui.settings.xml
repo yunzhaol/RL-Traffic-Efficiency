@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<viewsettings>
+    <delay value="200"/>
+    <viewport zoom="2000" x="300" y="300"/>
+    <scheme name="real world">
+        <background backgroundColor="255,255,255,255" showGrid="0" gridXSize="100.00" gridYSize="100.00"/>
+    </scheme>
+</viewsettings>

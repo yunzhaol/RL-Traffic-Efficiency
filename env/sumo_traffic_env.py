@@ -74,11 +74,16 @@ class SumoTrafficEnv:
             )
 
         # Locate the sumo binary and resolve SUMO_HOME
+        import glob as _glob
         binary = "sumo-gui" if use_gui else "sumo"
+        # Discover any installed SUMO version under the macOS framework path
+        _versioned = _glob.glob(
+            "/Library/Frameworks/EclipseSUMO.framework/Versions/*/EclipseSUMO"
+        )
         _SUMO_SEARCH = [
             os.environ.get("SUMO_HOME", ""),
-            "/Library/Frameworks/EclipseSUMO.framework/Versions/1.26.0/EclipseSUMO",
             "/Library/Frameworks/EclipseSUMO.framework/Versions/Current/EclipseSUMO",
+        ] + sorted(_versioned, reverse=True) + [
             "/opt/homebrew/share/sumo",
             "/usr/local/share/sumo",
         ]
@@ -130,24 +135,25 @@ class SumoTrafficEnv:
                     RuntimeWarning,
                 )
                 os.environ.pop("DISPLAY", None)
-            traci.start(cmd, stdout=subprocess.DEVNULL, numRetries=1)
+            traci.start(cmd, stdout=subprocess.DEVNULL, numRetries=10)
             self._sumo_running = True
             return
         except Exception as e:
-            # On some systems (e.g. remote/headless terminals), sumo-gui fails
-            # with display errors. Fall back to headless sumo automatically.
+            # On some systems (e.g. integrated terminals without display access),
+            # sumo-gui fails. Fall back to headless sumo automatically.
             if self.use_gui:
                 headless_bin = self._sumo_bin.replace("sumo-gui", "sumo")
                 if headless_bin == self._sumo_bin:
                     headless_bin = "sumo"
                 warnings.warn(
-                    f"SUMO-GUI unavailable ({e}). Falling back to headless SUMO.",
+                    f"SUMO-GUI unavailable ({e}). Falling back to headless SUMO.\n"
+                    "For GUI: run the demo command from Terminal.app instead.",
                     RuntimeWarning,
                 )
                 self.use_gui = False
                 self._delay_ms = 0
                 self._sumo_bin = headless_bin
-                traci.start(_build_cmd(self._sumo_bin), stdout=subprocess.DEVNULL, numRetries=1)
+                traci.start(_build_cmd(self._sumo_bin), stdout=subprocess.DEVNULL, numRetries=10)
                 self._sumo_running = True
                 return
             raise

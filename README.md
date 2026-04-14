@@ -13,33 +13,33 @@ Traditional fixed-time traffic signals are inefficient. The goal is to use RL to
 
 ### CityFlow
 ```bash
-# Step 1 — Install CityFlow (one-time, handles cmake + build automatically, ~1 min)
+# Step 1 — Install Python dependencies
+pip install -r requirements.txt
+
+# Step 2 — Install CityFlow (one-time, handles cmake + build automatically, ~1 min)
 bash install_cityflow.sh
 
-# Step 2 — Run full experiment (Fixed baseline + DQN + PPO + plots)
+# Step 3 — Run full experiment (Fixed baseline + DQN + PPO + plots)
 bash run_cityflow.sh
 ```
 
 ### SUMO
 ```bash
-# Step 1 — Download and install the macOS package (one-time, ~5–15 min)
+# Step 1 — Install Python dependencies
+pip install -r requirements.txt
+
+# Step 2 — Download and install the macOS package (one-time, ~5–15 min)
 # https://sumo.dlr.de/docs/Downloads.php  →  macOS  →  download .pkg  →  double-click to install
 
-# Step 2 — Add SUMO to your shell (add to ~/.zshrc, then restart terminal)
-export SUMO_HOME="/Library/Frameworks/EclipseSUMO.framework/Versions/1.26.0/EclipseSUMO"
+# Step 3 — Add SUMO to your shell (add to ~/.zshrc, then restart terminal)
+# Replace X.XX.X with the version you installed (check /Library/Frameworks/EclipseSUMO.framework/Versions/)
+export SUMO_HOME="/Library/Frameworks/EclipseSUMO.framework/Versions/Current/EclipseSUMO"
 export PATH="$PATH:$SUMO_HOME/bin"
-
-# Step 3 (only if GUI cannot open) — install and start XQuartz
-brew install --cask xquartz
-open -a XQuartz
-export DISPLAY=:0
-xhost +localhost
-
-# Quick test
-sumo-gui -c data/sumo/cross.sumocfg
 
 # Step 4 — Run full experiment (auto-generates network on first run)
 bash run_sumo.sh
+
+# Note: to open the SUMO-GUI demo, run from Terminal.app or iTerm (not from Cursor's terminal)
 ```
 
 ### Both simulators
@@ -112,9 +112,21 @@ bash run_showcase.sh --gui-settings data/sumo/gui.settings.xml
 ```
 
 Generated files:
-- `results/evaluation_sumo.json`
-- `results/evaluation_sumo.png`
-- `results/phase_timeline_sumo.png`
+
+Training (`run_cityflow.sh` / `run_sumo.sh`):
+- `results/dqn_{sim}_rewards.txt` / `results/dqn_{sim}_losses.txt`
+- `results/ppo_{sim}_rewards.txt` / `results/ppo_{sim}_losses.txt`
+- `results/fixed_{sim}_rewards.txt`
+- `results/dqn_{sim}_plot.png` — reward + loss curves for DQN
+- `results/ppo_{sim}_plot.png` — reward + loss curves for PPO
+- `results/comparison_{sim}.png` — reward comparison across all methods
+- `results/comparison_rewards.png` / `results/comparison_losses.png` — cross-simulator comparison
+- `checkpoints/dqn_{sim}_best.pt` / `checkpoints/ppo_{sim}_best.pt` — saved model weights
+
+Showcase (`run_showcase.sh`):
+- `results/evaluation_{sim}.json` — raw metrics (reward, queue, throughput) per method
+- `results/evaluation_{sim}.png` — bar chart comparing fixed / DQN / PPO
+- `results/phase_timeline_{sim}.png` — signal phase decisions over time
 
 ---
 
