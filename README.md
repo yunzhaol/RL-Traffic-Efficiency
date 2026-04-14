@@ -98,19 +98,6 @@ python3 training/demo.py --method ppo --sim sumo --delay 200
 python3 training/demo.py --method dqn --sim sumo --delay 200 --gui-settings data/sumo/gui.settings.xml
 ```
 
-Save camera once (so you do not manually Locate/zoom every time):
-```bash
-# 1) Open SUMO-GUI once, move view to center intersection, set zoom
-sumo-gui -c data/sumo/cross.sumocfg
-
-# 2) In GUI menu: File -> Save GUI Settings As...
-#    Save to: data/sumo/gui.settings.xml
-
-# 3) Reuse saved camera automatically in demo/showcase
-python3 training/demo.py --method dqn --sim sumo --delay 200 --gui-settings data/sumo/gui.settings.xml
-bash run_showcase.sh --gui-settings data/sumo/gui.settings.xml
-```
-
 Generated files:
 
 Training (`run_cityflow.sh` / `run_sumo.sh`):

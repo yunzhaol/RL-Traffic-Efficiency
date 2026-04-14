@@ -1,0 +1,23 @@
+{
+  "fixed": {
+    "avg_reward": -1982.3499999999997,
+    "std_reward": 2.2737367544323206e-13,
+    "avg_queue": 449.56499999999994,
+    "std_queue": 5.684341886080802e-14,
+    "avg_throughput": null
+  },
+  "dqn": {
+    "avg_reward": -1983.5999999999997,
+    "std_reward": 2.2737367544323206e-13,
+    "avg_queue": 446.5950000000001,
+    "std_queue": 5.684341886080802e-14,
+    "avg_throughput": null
+  },
+  "ppo": {
+    "avg_reward": -1791.9099999999999,
+    "std_reward": 28.225855168621614,
+    "avg_queue": 469.575,
+    "std_queue": 5.829023503126403,
+    "avg_throughput": null
+  }
+}
