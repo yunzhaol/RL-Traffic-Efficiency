@@ -14,10 +14,10 @@
     "avg_throughput": null
   },
   "ppo": {
-    "avg_reward": -1791.9099999999999,
-    "std_reward": 28.225855168621614,
-    "avg_queue": 469.575,
-    "std_queue": 5.829023503126403,
+    "avg_reward": -1779.325,
+    "std_reward": 46.55746046553665,
+    "avg_queue": 474.9345,
+    "std_queue": 8.813981634312599,
     "avg_throughput": null
   }
 }

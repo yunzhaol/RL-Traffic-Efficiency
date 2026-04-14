@@ -129,7 +129,12 @@ def plot_bar_chart(all_results: dict, sim: str, show: bool = False):
     colors = {"fixed": "tab:gray", "dqn": "tab:blue", "ppo": "tab:orange"}
     labels = {"fixed": "Fixed-time", "dqn": "DQN", "ppo": "PPO"}
 
-    fig, axes = plt.subplots(1, 3, figsize=(14, 5))
+    tp_methods = [m for m in methods if all_results[m].get("avg_throughput") is not None]
+    has_throughput = bool(tp_methods)
+    ncols = 3 if has_throughput else 2
+    fig_width = 14 if has_throughput else 10
+
+    fig, axes = plt.subplots(1, ncols, figsize=(fig_width, 5))
     fig.suptitle(f"Performance Comparison — {sim.upper()}", fontsize=13, fontweight="bold")
 
     # ── Avg reward ────────────────────────────────────────────────────────
@@ -150,7 +155,6 @@ def plot_bar_chart(all_results: dict, sim: str, show: bool = False):
     vals = [all_results[m]["avg_queue"] for m in methods]
     errs = [all_results[m]["std_queue"] for m in methods]
 
-    # Compute % improvement vs fixed-time
     fixed_queue = all_results.get("fixed", {})
     fixed_q     = fixed_queue.get("avg_queue", None) if fixed_queue else None
 
@@ -167,10 +171,9 @@ def plot_bar_chart(all_results: dict, sim: str, show: bool = False):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() * 1.01,
                 label, ha="center", va="bottom", fontsize=8)
 
-    # ── Throughput (SUMO only) ────────────────────────────────────────────
-    ax = axes[2]
-    tp_methods = [m for m in methods if all_results[m].get("avg_throughput") is not None]
-    if tp_methods:
+    # ── Throughput (SUMO only — omitted for CityFlow) ─────────────────────
+    if has_throughput:
+        ax = axes[2]
         tp_vals = [all_results[m]["avg_throughput"] for m in tp_methods]
         bars = ax.bar([labels[m] for m in tp_methods], tp_vals,
                       color=[colors[m] for m in tp_methods], alpha=0.85)
@@ -180,11 +183,6 @@ def plot_bar_chart(all_results: dict, sim: str, show: bool = False):
         for bar, val in zip(bars, tp_vals):
             ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() * 1.01,
                     f"{val:.0f}", ha="center", va="bottom", fontsize=9)
-    else:
-        ax.text(0.5, 0.5, "Throughput available\nfor SUMO only",
-                ha="center", va="center", transform=ax.transAxes, fontsize=10,
-                color="gray")
-        ax.set_title("Throughput", fontweight="bold")
 
     plt.tight_layout()
     out = os.path.join(RESULTS_DIR, f"evaluation_{sim}.png")
